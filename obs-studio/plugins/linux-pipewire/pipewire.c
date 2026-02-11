@@ -946,7 +946,7 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 	obs_pipewire_stream *obs_pw_stream = user_data;
 
 	// blog(LOG_INFO, "[pipewire] negotiated on enter: %d", obs_pw_stream->negotiated);
-	blog(LOG_INFO, "[pipewire] param_changed id: %u param: %p negotiated: %d", id, param, obs_pw_stream->negotiated);
+	blog(LOG_INFO, "[pipewire] Foo bar baz param_changed id: %u param: %p negotiated: %d", id, param, obs_pw_stream->negotiated);
 
 	// if (obs_pw_stream->negotiated)
 	//    return;
