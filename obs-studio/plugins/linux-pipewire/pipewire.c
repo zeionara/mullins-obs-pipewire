@@ -944,22 +944,6 @@ static void on_process_cb(void *user_data)
 static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_pod *param)
 {
 	obs_pipewire_stream *obs_pw_stream = user_data;
-
-	// blog(LOG_INFO, "[pipewire] negotiated on enter: %d", obs_pw_stream->negotiated);
-	blog(LOG_INFO, "[pipewire] Foo bar baz param_changed id: %u param: %p negotiated: %d", id, param, obs_pw_stream->negotiated);
-
-	// if (obs_pw_stream->negotiated)
-	//    return;
-	// 
-	// if (param == NULL) {
-	//     blog(LOG_INFO, "[pipewire] format cleared");
-	//     obs_pw_stream->negotiated = false;
-	//     return;
-	// }
-
-	// if (!param || id != SPA_PARAM_Format)
-	//    return;
-
 	obs_pipewire *obs_pw = obs_pw_stream->obs_pw;
 	struct spa_pod_builder pod_builder;
 	const struct spa_pod *params[7];
@@ -992,7 +976,7 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 	bool has_modifier = spa_pod_find_prop(param, NULL, SPA_FORMAT_VIDEO_modifier) != NULL;
 	if ((has_modifier || check_pw_version(&obs_pw->server_version, 0, 3, 24)) &&
 	    (output_flags & OBS_SOURCE_ASYNC_VIDEO) != OBS_SOURCE_ASYNC_VIDEO) {
-		// buffer_types |= 1 << SPA_DATA_DmaBuf;
+		buffer_types |= 1 << SPA_DATA_DmaBuf;
 #if PW_CHECK_VERSION(1, 2, 0)
 		obs_enter_graphics();
 		supports_explicit_sync = gs_query_sync_capabilities();
@@ -1002,11 +986,11 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 
 	// fallback to default framerate
 
-	// if (obs_pw_stream->format.info.raw.framerate.num == 0 || obs_pw_stream->format.info.raw.framerate.denom == 0) {
-	// 	obs_pw_stream->format.info.raw.framerate.num = 30;
-	// 	obs_pw_stream->format.info.raw.framerate.denom = 1;
-	// 	blog(LOG_INFO, "[pipewire] Using fallback framerate 30/1");
-	// }
+	if (obs_pw_stream->format.info.raw.framerate.num == 0 || obs_pw_stream->format.info.raw.framerate.denom == 0) {
+		obs_pw_stream->format.info.raw.framerate.num = 30;
+		obs_pw_stream->format.info.raw.framerate.denom = 1;
+		blog(LOG_INFO, "[pipewire] Using fallback framerate 30/1");
+	}
 
 	blog(LOG_INFO, "[pipewire] Negotiated format:");
 
@@ -1055,20 +1039,19 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 	}
 #endif
 
-	/* params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
-							SPA_PARAM_BUFFERS_dataType, SPA_POD_Int(buffer_types)); */
-	params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers);
+	params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
+							SPA_PARAM_BUFFERS_dataType, SPA_POD_Int(buffer_types));
 
 	blog(LOG_INFO, "[pipewire] sync timeline");
 
 	/* Sync timeline */
 #if PW_CHECK_VERSION(1, 2, 0)
-	// if (supports_explicit_sync) {
-	// 	params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamMeta, SPA_PARAM_Meta,
-	// 							SPA_PARAM_META_type, SPA_POD_Id(SPA_META_SyncTimeline),
-	// 							SPA_PARAM_META_size,
-	// 							SPA_POD_Int(sizeof(struct spa_meta_sync_timeline)));
-	// }
+	if (supports_explicit_sync) {
+		params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamMeta, SPA_PARAM_Meta,
+								SPA_PARAM_META_type, SPA_POD_Id(SPA_META_SyncTimeline),
+								SPA_PARAM_META_size,
+								SPA_POD_Int(sizeof(struct spa_meta_sync_timeline)));
+	}
 #endif
 
 	blog(LOG_INFO, "[pipewire] meta header");
@@ -1094,9 +1077,9 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 
 	pw_stream_update_params(obs_pw_stream->stream, params, n_params);
 
-	obs_pw_stream->negotiated = true;
+	blog(LOG_INFO, "[pipewire] negotiated");
 
-	blog(LOG_INFO, "[pipewire] negotiated on exit: %d", obs_pw_stream->negotiated);
+	obs_pw_stream->negotiated = true;
 }
 
 static void on_state_changed_cb(void *user_data, enum pw_stream_state old, enum pw_stream_state state,
