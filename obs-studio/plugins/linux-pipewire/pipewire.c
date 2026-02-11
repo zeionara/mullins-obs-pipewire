@@ -1077,8 +1077,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 
 	pw_stream_update_params(obs_pw_stream->stream, params, n_params);
 
-	blog(LOG_INFO, "[pipewire] negotiated");
-
 	obs_pw_stream->negotiated = true;
 }
 

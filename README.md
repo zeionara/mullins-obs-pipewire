@@ -31,3 +31,9 @@ sudo rm /var/tmp/portage/media-video/obs-studio-$OBS_VERSION/.compiled
 sudo ebuild $(portageq get_repo_path / gentoo)/media-video/obs-studio/obs-studio-$OBS_VERSION.ebuild compile
 sudo cp $(portageq get_repo_path / gentoo)/media-video/obs-studio-$OBS_VERSION/work/obs-studio-${OBS_VERSION}_build/plugins/linux-pipewire/linux-pipewire.so /usr/lib64/obs-plugins
 ```
+
+Run `obs-studio` and generate detailed log:
+
+```sh
+PIPEWIRE_DEBUG=4 obs -vvv 2>&1 | tee obs-studio/log.txt
+```
