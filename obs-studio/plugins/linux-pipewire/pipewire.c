@@ -984,14 +984,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 #endif
 	}
 
-	// fallback to default framerate
-
-	if (obs_pw_stream->format.info.raw.framerate.num == 0 || obs_pw_stream->format.info.raw.framerate.denom == 0) {
-		obs_pw_stream->format.info.raw.framerate.num = 30;
-		obs_pw_stream->format.info.raw.framerate.denom = 1;
-		blog(LOG_INFO, "[pipewire] Using fallback framerate 30/1");
-	}
-
 	blog(LOG_INFO, "[pipewire] Negotiated format:");
 
 	format_name = spa_debug_type_find_name(spa_type_video_format, obs_pw_stream->format.info.raw.format);
@@ -1022,8 +1014,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 					   SPA_POD_CHOICE_RANGE_Int(CURSOR_META_SIZE(64, 64), CURSOR_META_SIZE(1, 1),
 								    CURSOR_META_SIZE(1024, 1024)));
 
-	blog(LOG_INFO, "[pipewire] buffer options");
-
 	/* Buffer options */
 #if PW_CHECK_VERSION(1, 2, 0)
 	if (supports_explicit_sync) {
@@ -1042,8 +1032,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 	params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
 							SPA_PARAM_BUFFERS_dataType, SPA_POD_Int(buffer_types));
 
-	blog(LOG_INFO, "[pipewire] sync timeline");
-
 	/* Sync timeline */
 #if PW_CHECK_VERSION(1, 2, 0)
 	if (supports_explicit_sync) {
@@ -1053,8 +1041,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 								SPA_POD_Int(sizeof(struct spa_meta_sync_timeline)));
 	}
 #endif
-
-	blog(LOG_INFO, "[pipewire] meta header");
 
 	/* Meta header */
 	params[n_params++] = spa_pod_builder_add_object(&pod_builder, SPA_TYPE_OBJECT_ParamMeta, SPA_PARAM_Meta,
@@ -1073,8 +1059,6 @@ static void on_param_changed_cb(void *user_data, uint32_t id, const struct spa_p
 	}
 #endif
 
-	blog(LOG_INFO, "[pipewire] stream update params");
-
 	pw_stream_update_params(obs_pw_stream->stream, params, n_params);
 
 	obs_pw_stream->negotiated = true;
@@ -1090,6 +1074,7 @@ static void on_state_changed_cb(void *user_data, enum pw_stream_state old, enum 
 	blog(LOG_INFO, "[pipewire] Stream %p state: \"%s\" (error: %s)", obs_pw_stream->stream,
 	     pw_stream_state_as_string(state), error ? error : "none");
 }
+
 
 static const struct pw_stream_events stream_events = {
 	PW_VERSION_STREAM_EVENTS,

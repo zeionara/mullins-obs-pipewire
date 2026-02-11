@@ -22,6 +22,7 @@ Create link to the source file with `pipewire` script in obs:
 
 ```sh
 sudo ln -s $HOME/mullins-obs-pipewire/obs-studio/plugins/linux-pipewire/pipewire.c /var/tmp/portage/media-video/obs-studio-/work/obs-studio-$OBS_VERSION/plugins/linux-pipewire/pipewire.c
+sudo ln -s $HOME/mullins-obs-pipewire/obs-studio/plugins/linux-pipewire/CMakeLists.txt /var/tmp/portage/media-video/obs-studio-/work/obs-studio-$OBS_VERSION/plugins/linux-pipewire/CMakeLists.txt
 ```
 
 Compile and install `obs` (see `./obs-studio/install.sh`):
